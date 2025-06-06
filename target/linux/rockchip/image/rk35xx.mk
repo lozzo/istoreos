@@ -174,6 +174,16 @@ $(call Device/rk3568)
 endef
 TARGET_DEVICES += easepi_r1
 
+define Device/easepi_r1-lite
+$(call Device/rk3568)
+  DEVICE_VENDOR := EasePi
+  DEVICE_MODEL := R1 (4xGbE)
+  DEVICE_DTS := rk3568-easepi-r1-lite
+  SUPPORTED_DEVICES += easepi,r1 easepi,r1-lite
+  DEVICE_PACKAGES := kmod-r8168 kmod-nvme kmod-thermal
+endef
+TARGET_DEVICES += easepi_r1-lite
+
 define Device/easepi_r2
 $(call Device/rk3568)
   DEVICE_VENDOR := EasePi
@@ -206,7 +216,7 @@ TARGET_DEVICES += friendlyarm_nanopi-r5s
 define Device/firefly_station-p2
 $(call Device/rk3568)
   DEVICE_VENDOR := Firefly
-  DEVICE_MODEL := Station P2 / ROC PC
+  DEVICE_MODEL := Station P2 / RK3568 ROC PC
   DEVICE_DTS := rk3568-firefly-roc-pc
   SUPPORTED_DEVICES += firefly,rk3568-roc-pc firefly,station-p2
   DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-scsi-core
@@ -396,6 +406,16 @@ $(call Device/rk3566)
 endef
 TARGET_DEVICES += panther_x2
 
+define Device/firefly_station-m2
+$(call Device/rk3566)
+  DEVICE_VENDOR := Firefly
+  DEVICE_MODEL := Station M2 / RK3566 ROC PC
+  DEVICE_DTS := rk3566-firefly-roc-pc
+  SUPPORTED_DEVICES += rockchip,rk3566-firefly-roc-pc firefly,rk3566-roc-pc firefly,station-m2
+  DEVICE_PACKAGES := kmod-nvme kmod-scsi-core
+endef
+TARGET_DEVICES += firefly_station-m2
+
 define Device/le_hes30
 $(call Device/rk3566)
   DEVICE_VENDOR := LE
@@ -405,6 +425,24 @@ $(call Device/rk3566)
   DEVICE_PACKAGES := kmod-scsi-core kmod-thermal kmod-hwmon-pwmfan
 endef
 TARGET_DEVICES += le_hes30
+
+define Device/klan_nas101
+$(call Device/rk3566)
+  DEVICE_VENDOR := Klan
+  DEVICE_MODEL := NAS 101
+  DEVICE_DTS := rk3566-klan-nas101
+  DEVICE_PACKAGES := kmod-scsi-core
+endef
+TARGET_DEVICES += klan_nas101
+
+define Device/klan_nas102
+$(call Device/rk3566)
+  DEVICE_VENDOR := Klan
+  DEVICE_MODEL := NAS 102
+  DEVICE_DTS := rk3566-klan-nas102
+  DEVICE_PACKAGES := kmod-scsi-core
+endef
+TARGET_DEVICES += klan_nas102
 
 define Device/linkfog_ala2
 $(call Device/rk3568)

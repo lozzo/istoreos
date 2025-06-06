@@ -1,4 +1,3 @@
-/dts-v1/;
 
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/pinctrl/rockchip.h>
@@ -6,20 +5,16 @@
 #include <dt-bindings/input/rk-input.h>
 #include <dt-bindings/sensor-dev.h>
 #include "rk3566.dtsi"
+#include "../rockchip-drm-vvop.dtsi"
 
 / {
-	model = "HES30";
-	compatible = "le,hes30", "rockchip,rk3566";
-
-	aliases {
-		led-boot = &sys_led;
-		led-failsafe = &sys_led;
-		led-running = &sys_led;
-		led-upgrade = &sys_led;
-	};
+	model = "Klan NAS";
+	compatible = "klan,nas", "rockchip,rk3566";
 
 	chosen: chosen {
 		bootargs = "earlycon=uart8250,mmio32,0xfe660000 console=ttyFIQ0 root=PARTUUID=614e0000-0000 rw rootwait";
+		default-hostname = "ikinglink";
+		has-vendor-mac;
 	};
 
 	fiq-debugger {
@@ -103,18 +98,6 @@
 		vin-supply = <&vcc5v0_usb>;
 	};
 
-	vcc3v3_m2_sata: vcc3v3-m2-sata {
-		compatible = "regulator-fixed";
-		enable-active-high;
-		gpio = <&gpio0 RK_PC4 GPIO_ACTIVE_HIGH>;
-		pinctrl-names = "default";
-		pinctrl-0 = <&m2_sata_pwr_en>;
-		regulator-name = "vcc3v3_m2_sata";
-		regulator-min-microvolt = <3300000>;
-		regulator-max-microvolt = <3300000>;
-		vin-supply = <&vcc5v0_sys>;
-	};
-
 	vcc12v_5v_hdd: vcc12v-5v-hdd {
 		compatible = "regulator-fixed";
 		enable-active-high;
@@ -123,21 +106,6 @@
 		pinctrl-0 = <&sata_pwr_en>;
 		regulator-name = "vcc12v_5v_hdd";
 		vin-supply = <&vcc5v0_sys>,<&dc_12v>;
-	};
-
-	hdmi_sound: hdmi-sound {
-		compatible = "simple-audio-card";
-		simple-audio-card,format = "i2s";
-		simple-audio-card,mclk-fs = <128>;
-		simple-audio-card,name = "rockchip,hdmi";
-		status = "disabled";
-
-		simple-audio-card,cpu {
-				sound-dai = <&i2s0_8ch>;
-		};
-		simple-audio-card,codec {
-				sound-dai = <&hdmi>;
-		};
 	};
 
 	gpio-keys {
@@ -158,48 +126,19 @@
 		compatible = "gpio-leds";
 		pinctrl-names = "default";
 		pinctrl-0 =
-			<&led_sys_pin>,
-			<&led_net_pin>;
-		sys_led: led-0 {
-			label = "red:sys";
-			gpios = <&gpio0 RK_PC3 GPIO_ACTIVE_HIGH>;
-			linux,default-trigger = "heartbeat";
+			<&led_red_pin>,
+			<&led_green_pin>;
+		net_fail_led: led-0 {
+			label = "red:net-fail";
+			gpios = <&gpio0 RK_PC3 GPIO_ACTIVE_LOW>;
 		};
-		net_led: led-1 {
-			label = "green:power";
+		net_ok_led: led-1 {
+			label = "green:net-ok";
 			gpios = <&gpio0 RK_PC7 GPIO_ACTIVE_HIGH>;
-			default-state = "on";
 		};
 	};
 
-#ifdef HES30_FAN_GPIO
-	fan: gpio-fan {
-		compatible = "gpio-fan";
-		pinctrl-names = "default";
-		pinctrl-0 = <&gpio_fan_pin>;
-		gpios = <&gpio0 RK_PC6 GPIO_ACTIVE_HIGH>;
-		#cooling-cells = <2>;
-		gpio-fan,speed-map =
-			<0 0>,
-			<3000 1>;
-	};
-#else
-	fan: pwm-fan {
-		compatible = "pwm-fan";
-		cooling-levels = <0 0x55 0x66 0x77 0x88 0x99 0xbb 0xcc 0xff>;
-		#cooling-cells = <2>;
-		fan-supply = <&vcc5v0_sys>;
-		// pwms = <&pwm7 0 50000 PWM_POLARITY_INVERTED>;
-		pwms = <&pwm7 0 50000 0>;
-	};
-#endif
 };
-
-#ifndef HES30_FAN_GPIO
-&pwm7 {
-	status = "okay";
-};
-#endif
 
 &gmac1 {
 	snps,reset-gpio = <&gpio4 RK_PC2 GPIO_ACTIVE_LOW>;
@@ -287,48 +226,15 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&sata1_pins>;
 
-	target-supply = <&vcc12v_5v_hdd>;
 	status = "okay";
 };
 
 &sata2 {
-	target-supply = <&vcc3v3_m2_sata>;
-	status = "okay";
-};
+	// sata2 led
+	pinctrl-names = "default";
+	pinctrl-0 = <&sata2_pins>;
 
-// video output
-
-&vop {
-	assigned-clocks = <&cru DCLK_VOP0>, <&cru DCLK_VOP1>;
-	assigned-clock-parents = <&pmucru PLL_HPLL>, <&cru PLL_VPLL>;
-	status = "okay";
-};
-
-&vop_mmu {
-	status = "okay";
-};
-
-&hdmi {
-	assigned-clocks = <&cru CLK_HDMI_CEC>;
-	assigned-clock-rates = <32768>;
-	avdd-0v9-supply = <&vdda0v9_image>;
-	avdd-1v8-supply = <&vcca1v8_image>;
-	status = "okay";
-};
-
-&hdmi_in_vp0 {
-	status = "okay";
-};
-
-&hdmi_in_vp1 {
-	status = "disabled";
-};
-
-&hdmi_sound {
-	status = "okay";
-};
-
-&i2s0_8ch {
+	target-supply = <&vcc12v_5v_hdd>;
 	status = "okay";
 };
 
@@ -794,20 +700,17 @@
 	};
 
 	sata {
-		m2_sata_pwr_en: m2-sata-pwr-en {
-			rockchip,pins = <0 RK_PC4 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
 		sata_pwr_en: sata-pwr-en {
 			rockchip,pins = <0 RK_PC1 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
 	gpio-leds {
-		led_sys_pin: led-sys-pin {
+		led_red_pin: led-red-pin {
 			rockchip,pins =
-				<0 RK_PC3 RK_FUNC_GPIO &pcfg_pull_none>;
+				<0 RK_PC3 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
-		led_net_pin: led-net-pin {
+		led_green_pin: led-green-pin {
 			rockchip,pins =
 				<0 RK_PC7 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
@@ -819,85 +722,4 @@
 				<0 RK_PC2 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
-
-	gpio-fan {
-		/omit-if-no-ref/
-		gpio_fan_pin: gpio-fan-pin {
-			rockchip,pins =
-				<0 RK_PC6 RK_FUNC_GPIO &pcfg_pull_none>;
-		};
-	};
 };
-
-#ifdef HES30_FAN_GPIO
-&soc_thermal {
-	trips {
-		cpu_warm: cpu_warm {
-			temperature = <65000>;
-			hysteresis = <5000>;
-			type = "active";
-		};
-	};
-
-	cooling-maps {
-
-		map3 {
-			trip = <&cpu_warm>;
-			cooling-device = <&fan 1 1>;
-		};
-
-	};
-};
-#else
-&soc_thermal {
-	trips {
-
-		cpu_warm: cpu_warm {
-			temperature = <65000>;
-			hysteresis = <5000>;
-			type = "active";
-		};
-
-		cpu_hot: cpu_hot {
-			temperature = <85000>;
-			hysteresis = <5000>;
-			type = "active";
-		};
-
-		cpu_hall: cpu_hall {
-			temperature = <95000>;
-			hysteresis = <5000>;
-			type = "active";
-		};
-
-		cpu_idle: cpu_idle {
-			temperature = <47000>;
-			hysteresis = <5000>;
-			type = "passive";
-		};
-	};
-
-	cooling-maps {
-		map2 {
-			trip = <&cpu_idle>;
-			cooling-device = <&fan THERMAL_NO_LIMIT 2>;
-		};
-
-		map3 {
-			trip = <&cpu_warm>;
-			cooling-device = <&fan 2 4>;
-		};
-
-		map4 {
-			trip = <&cpu_hot>;
-			cooling-device = <&fan 4 6>;
-		};
-
-		map5 {
-			trip = <&cpu_hall>;
-			cooling-device = <&fan 6 THERMAL_NO_LIMIT>;
-		};
-
-	};
-};
-#endif

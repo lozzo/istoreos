@@ -33,7 +33,7 @@ rockchip_setup_interfaces()
 	friendlyelec,nanopi-r5s|friendlyelec,nanopi-r5s-c1)
 		ucidef_set_interfaces_lan_wan "eth1 eth2" "eth0"
 		;;
-	easepi,r1|\
+	easepi,r1|easepi,r1-lite|\
 	roceos,k40pro|\
 	lyt,t68m|\
 	lyt,t88m|\
@@ -95,6 +95,15 @@ generate_mac_from_mmc()
 	echo "$(macaddr_unsetbit_mc "$(macaddr_setbit_la "${mac_base}")")"
 }
 
+read_vendor_mac()
+{
+	if [ -f /proc/device-tree/chosen/has-vendor-mac -a -x /usr/sbin/vendorStorage ]; then
+		/usr/sbin/vendorStorage readMac
+		return 0
+	fi
+	return 1
+}
+
 rockchip_setup_macs()
 {
 	local board="$1"
@@ -104,7 +113,7 @@ rockchip_setup_macs()
 	case "$board" in
 	armsom,sige7-v1|\
 	easepi,ars4|\
-	easepi,r1|\
+	easepi,r1|easepi,r1-lite|\
 	ezpro,mrkaio-m68s|\
 	ezpro,mrkaio-m68s-plus|\
 	firefly,rk3568-roc-pc|\
@@ -146,7 +155,8 @@ rockchip_setup_macs()
 		lan_mac=$(macaddr_add "$wan_mac" 1)
 		;;
 	*)
-		lan_mac=$(generate_mac_from_mmc)
+		lan_mac=$(read_vendor_mac)
+		[ -n "$lan_mac" ] || lan_mac=$(generate_mac_from_mmc)
 		;;
 	esac
 
