@@ -98,13 +98,13 @@ TARGET_DEVICES += armsom_sige7-v1
 define Device/armsom_sige7-v1-1
 $(call Device/rk3588)
   DEVICE_VENDOR := ArmSoM
-  DEVICE_MODEL := sige7
+  DEVICE_MODEL := sige7-v1-1
   SUPPORTED_DEVICES += armsom,sige7-v1-1
   DEVICE_DTS := rk3588-sige7-v1-1
   DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-hwmon-pwmfan kmod-thermal kmod-rkwifi-bcmdhd-pcie rkwifi-firmware-ap6275p
   IMAGE/sysupgrade.img.gz := boot-combined | boot-script rk3588 | pine64-img | gzip | append-metadata
 endef
-TARGET_DEVICES += armsom_sige7-v1
+TARGET_DEVICES += armsom_sige7-v1-1
 
 define Device/fastrhino_common
 $(call Device/rk3568)
